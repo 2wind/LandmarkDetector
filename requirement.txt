@@ -1,0 +1,18 @@
+name: outline
+channels:
+  - defaults
+dependencies:
+  - matplotlib
+  - xlrd
+  - pillow
+  - pandas
+  - scipy
+  - numpy
+  - opencv
+  - torchaudio
+  - pytorch
+  - cudatoolkit=10.2
+  - torchvision
+  - scikit-learn
+  - tqdm
+prefix: C:\Users\yongwook\anaconda3\envs\outline
