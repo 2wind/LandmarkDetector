@@ -136,3 +136,4 @@ AutoAlign/
 legacy_models/
 
 *.pth
+*.tar
