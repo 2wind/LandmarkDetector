@@ -131,6 +131,7 @@ dmypy.json
 # NDA Required datas
 .AutoAlign/
 AutoAlign/
+AutoAlign_test/
 
 # Legacy models that takes too much space
 legacy_models/
