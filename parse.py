@@ -51,7 +51,7 @@ def main():
             print(f"per-landmark pixel difference: ")
             print(each)
             film_image = parse_image(args.film_image)
-            save_transform_image(film_landmarks, photo_landmarks, film_image, photo_image, args.output_image, matrix)
+            save_transform_image(film_landmarks, photo_landmarks, film_image, photo_image, args.output_image, matrix, photo_true_landmarks)
 
 
 
@@ -105,7 +105,7 @@ def transform_landmarks(matrix, landmarks):
     result = np.dot(matrix, homography_landmarks.T).T
     return result
 
-def save_transform_image(film_landmarks, photo_landmarks, film_image, photo_image, photo_output, matrix):
+def save_transform_image(film_landmarks, photo_landmarks, film_image, photo_image, photo_output, matrix, solution_landmarks=None):
     warped_image = cv2.warpAffine(np.array(film_image), matrix, (photo_image.size[0], photo_image.size[1]))
     warped_film = imutils.opencv2matplotlib(warped_image)
     warped_landmarks = transform_landmarks(matrix, film_landmarks)
@@ -115,8 +115,10 @@ def save_transform_image(film_landmarks, photo_landmarks, film_image, photo_imag
     plt.imshow(warped_film, alpha=0.5)
     plt.scatter(warped_landmarks[:,0], warped_landmarks[:,1], c = 'r', s = 5)
     plt.scatter(photo_landmarks[:,0], photo_landmarks[:,1], c = 'g', s = 5)
-    plt.text(0, 0, "Legend) landmarks in film(warped): red, landmarks found in photo: green")
-    plt.savefig(photo_output, bbox_inches='tight')
+    if (solution_landmarks is not None):
+        plt.scatter(solution_landmarks[:,0], solution_landmarks[:,1], c = 'b', s=5)
+    plt.text(0, 0, "Legend) landmarks in film(warped): red\n landmarks found in photo: green\n landmark solution of photo: blue")
+    plt.savefig(photo_output, bbox_inches='tight', dpi=300)
     print(f"photo saved on {photo_output}.")
 
 if __name__ == "__main__":

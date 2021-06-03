@@ -5,7 +5,9 @@ import torch.optim as optim
 from torchvision import datasets, models, transforms
 import torchvision.transforms.functional as TF
 
-landmark_regex_string = '29@[2479]|30@[34]' # for 18: '29@[1-9]\d?|30@[1-7]'
+# for 6 landmarks:  '29@[2479]|30@[34]' 
+# for 18 landmarks: '29@[1-9]\d?|30@[1-7]'
+landmark_regex_string = '29@[2479]|30@[34]'
 landmark_number = 6
 
 

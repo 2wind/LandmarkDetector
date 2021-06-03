@@ -81,8 +81,10 @@ def calculate_matrix(landmark_xray, landmark_image):
 
         Wrapper function for cv2.estimateAffinePartial2D().
         made it into own function, because sometimes certain landmarks are very unreliable.
+        
+        returns:  matrix: numpy.array(), a 2x3 matrix array which is affine transformation.
     '''
-    matrix, inliers = cv2.estimateAffinePartial2D(landmark_xray, landmark_image, method=cv2.LMEDS)
+    matrix, inliers = cv2.estimateAffinePartial2D(landmark_xray[:], landmark_image[:], method=cv2.LMEDS)
 
     return matrix
 
