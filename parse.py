@@ -16,10 +16,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-v', '--verbose', help='output some helpful texts', action='store_true')
 
 # Image and tsv file arguments
-parser.add_argument('--film_image', type=str, default='film.jpg', help='path to the film image')
-parser.add_argument('--film_tsv', type=str, default='film.txt', help='path to the film landmark')
-parser.add_argument('--photo_image', type=str, default='photo.jpg', help='path to the photo image')
-parser.add_argument('--photo_tsv', type=str, help='path to the photo landmark(Optional)')
+parser.add_argument('-fi', '--film_image', type=str, default='film.jpg', help='path to the film image')
+parser.add_argument('-ft', '--film_tsv', type=str, default='film.txt', help='path to the film landmark')
+parser.add_argument('-pi', '--photo_image', type=str, default='photo.jpg', help='path to the photo image')
+parser.add_argument('-pt', '--photo_tsv', type=str, help='path to the photo landmark(Optional)')
 
 # landmark detection model arguments
 parser.add_argument('-m', '--model', type=str, default='model.tar', help='path to the model')
@@ -38,7 +38,8 @@ def main():
 
     photo_landmarks = inference.find_landmark(photo_image, model)
 
-    transform = inference.calculate_transform(film_landmarks, photo_landmarks)
+    matrix = inference.calculate_matrix(film_landmarks, photo_landmarks)
+    transform = inference.calculate_transform(film_landmarks, photo_landmarks, matrix)
 
     save_results(transform, args.output)
 
@@ -50,7 +51,7 @@ def main():
             print(f"per-landmark pixel difference: ")
             print(each)
             film_image = parse_image(args.film_image)
-            save_transform_image(film_landmarks, photo_landmarks, film_image, photo_image, args.output_image)
+            save_transform_image(film_landmarks, photo_landmarks, film_image, photo_image, args.output_image, matrix)
 
 
 
@@ -98,19 +99,25 @@ def save_results(transform: list, output_path:str):
         output.write(output_string)
 
 
-def save_transform_image(film_landmarks, photo_landmarks, film_image, photo_image, photo_output):
-    matrix, inliers = cv2.estimateAffinePartial2D(film_landmarks[1:], photo_landmarks[1:], method=cv2.LMEDS)
+def transform_landmarks(matrix, landmarks):
+    ones = np.ones((1, len(landmarks)))
+    homography_landmarks = np.concatenate((landmarks, ones.T), axis=1)
+    result = np.dot(matrix, homography_landmarks.T).T
+    return result
+
+def save_transform_image(film_landmarks, photo_landmarks, film_image, photo_image, photo_output, matrix):
     warped_image = cv2.warpAffine(np.array(film_image), matrix, (photo_image.size[0], photo_image.size[1]))
-
-
     warped_film = imutils.opencv2matplotlib(warped_image)
+    warped_landmarks = transform_landmarks(matrix, film_landmarks)
+
     plt.figure()
     plt.imshow(photo_image)
     plt.imshow(warped_film, alpha=0.5)
-    # plt.scatter(warped_landmarks[:,0], warped_landmarks[:,1], c = 'r', s = 5)
+    plt.scatter(warped_landmarks[:,0], warped_landmarks[:,1], c = 'r', s = 5)
     plt.scatter(photo_landmarks[:,0], photo_landmarks[:,1], c = 'g', s = 5)
+    plt.text(0, 0, "Legend) landmarks in film(warped): red, landmarks found in photo: green")
     plt.savefig(photo_output, bbox_inches='tight')
-
+    print(f"photo saved on {photo_output}.")
 
 if __name__ == "__main__":
     main()
