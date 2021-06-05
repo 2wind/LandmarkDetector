@@ -11,24 +11,7 @@ import numpy as np
 import inference
 import module
 
-parser = argparse.ArgumentParser()
-# General arguments
-parser.add_argument('-v', '--verbose', help='output some helpful texts', action='store_true')
 
-# Image and tsv file arguments
-parser.add_argument('-fi', '--film_image', type=str, default='film.jpg', help='path to the film image')
-parser.add_argument('-ft', '--film_tsv', type=str, default='film.txt', help='path to the film landmark')
-parser.add_argument('-pi', '--photo_image', type=str, default='photo.jpg', help='path to the photo image')
-parser.add_argument('-pt', '--photo_tsv', type=str, help='path to the photo landmark(Optional)')
-
-# landmark detection model arguments
-parser.add_argument('-m', '--model', type=str, default='model.tar', help='path to the model')
-
-# output arguments
-parser.add_argument('-o', '--output', type=str, default='result.txt', help='path to the output')
-parser.add_argument('--output_image', type=str, default='result.jpg', help='path to the output image(verbose)')
-
-args = parser.parse_args()
 
 def main():
     '''
@@ -45,6 +28,27 @@ def main():
     returns:
         Nothing.
     '''
+    parser = argparse.ArgumentParser()
+    # General arguments
+    parser.add_argument('-v', '--verbose', help='output some helpful texts', action='store_true')
+
+    # Image and tsv file arguments
+    parser.add_argument('-fi', '--film_image', type=str, default='film.jpg', help='path to the film image')
+    parser.add_argument('-ft', '--film_tsv', type=str, default='film.txt', help='path to the film landmark')
+    parser.add_argument('-pi', '--photo_image', type=str, default='photo.jpg', help='path to the photo image')
+    parser.add_argument('-pt', '--photo_tsv', type=str, help='path to the photo landmark(Optional)')
+
+    # landmark detection model arguments
+    parser.add_argument('-m', '--model', type=str, default='model.tar', help='path to the model')
+
+    # output arguments
+    parser.add_argument('-o', '--output', type=str, default='result.txt', help='path to the output')
+    parser.add_argument('--output_image', type=str, default='result.jpg', help='path to the output image(verbose)')
+
+    args = parser.parse_args()
+
+
+
     photo_image = parse_image(args.photo_image)
     film_landmarks = extract_landmarks(parse_tsv(args.film_tsv), module.landmark_regex_string, module.landmark_number)
 
