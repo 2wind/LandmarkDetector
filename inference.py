@@ -1,16 +1,10 @@
 import numpy as np
 from PIL import Image
 import cv2
-import imutils
 
 import torch 
 import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
 import torchvision.transforms.functional as TF
-
-import random
-import math
 
 import module
 
@@ -73,11 +67,28 @@ def find_landmark(input_image: Image, model: module.LandmarkNetwork):
 
     return landmarks
 
-def calculate_transform(landmark_xray, landmark_image):
+def calculate_matrix(landmark_xray, landmark_image):
+    '''
+    calculate_matrix(landmark_xray: numpy.array(), landmark_image: numpy.array()):
+        landmark_xray: numpy.array(), landmarks in xray.
+        landmark_image: numpy.array(), landmarks in image.
+
+        Wrapper function for cv2.estimateAffinePartial2D().
+        made it into own function, because sometimes certain landmarks are very unreliable.
+        
+        returns:  matrix: numpy.array(), a 2x3 matrix array which is affine transformation.
+    '''
+    matrix, inliers = cv2.estimateAffinePartial2D(landmark_xray[:], landmark_image[:], method=cv2.LMEDS)
+
+    return matrix
+
+
+def calculate_transform(landmark_xray, landmark_image, matrix):
     '''
     calculate_transform(landmark_xray: numpy.array(), landmark_image: numpy.array())
         landmark_xray: numpy.array(), landmarks in xray.
         landmark_image: numpy.array(), landmarks in image.
+        matrix: numpy.array(), a 2x3 matrix array which is affine transformation.
 
     Calculates affine transfrom from landmark_xray to landmark_iamge.
     1. calculate partial affine transform matrix using method in opencv.
@@ -87,8 +98,6 @@ def calculate_transform(landmark_xray, landmark_image):
     return: a list of [translation_x, translation_y, scale, degree].
     '''
     # Calculate 
-    matrix, inliers = cv2.estimateAffinePartial2D(landmark_xray[1:], landmark_image[1:], method=cv2.LMEDS)
-
     translation_x, translation_y = matrix[0, 2], matrix[1, 2]
     scale = (matrix[0, 0] * matrix[0, 0] + matrix[1, 0] * matrix[1, 0]) ** 0.5
     rotation = np.arctan2(matrix[0, 1], matrix[1, 1])
