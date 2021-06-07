@@ -11,6 +11,8 @@ import numpy as np
 import inference
 import module
 
+import time
+
 
 
 def main():
@@ -31,6 +33,7 @@ def main():
     parser = argparse.ArgumentParser()
     # General arguments
     parser.add_argument('-v', '--verbose', help='output some helpful texts', action='store_true')
+    parser.add_argument('-t', '--test', help='testing landmark detection only', action='store_true')
 
     # Image and tsv file arguments
     parser.add_argument('-fi', '--film_image', type=str, default='film.jpg', help='path to the film image')
@@ -50,11 +53,16 @@ def main():
 
 
     photo_image = parse_image(args.photo_image)
-    film_landmarks = extract_landmarks(parse_tsv(args.film_tsv), module.landmark_regex_string, module.landmark_number)
 
     model = inference.load_model(args.model)
 
     photo_landmarks = inference.find_landmark(photo_image, model)
+
+    if (args.test):
+        print(photo_landmarks)
+        return
+
+    film_landmarks = extract_landmarks(parse_tsv(args.film_tsv), module.landmark_regex_string, module.landmark_number)
 
     matrix = inference.calculate_matrix(film_landmarks, photo_landmarks)
     transform = inference.calculate_transform(film_landmarks, photo_landmarks, matrix)
@@ -71,9 +79,6 @@ def main():
             film_image = parse_image(args.film_image)
             save_transform_image(film_landmarks, photo_landmarks, film_image, photo_image, args.output_image, matrix, photo_true_landmarks)
 
-
-
-
     del model
 
 def parse_image(image_path: str):
@@ -89,7 +94,7 @@ def parse_image(image_path: str):
     try:
         image = Image.open(image_path)
         return image
-    except:
+    except FileNotFoundError:
         print(f"Image not found in {image_path}")
         exit()
 
@@ -120,7 +125,7 @@ def parse_tsv(tsv_path: str):
         df.columns = ['name', 'X', 'Y']
 
         return df
-    except:
+    except FileNotFoundError:
         print(f"Landmark text file not found in {tsv_path}")
         exit()
 
@@ -236,4 +241,7 @@ def save_transform_image(film_landmarks, photo_landmarks, film_image, photo_imag
     print(f"photo saved on {photo_output}.")
 
 if __name__ == "__main__":
+    start = time.perf_counter()
     main()
+    end = time.perf_counter()
+    print(f"took {end - start:0.4f} seconds")
