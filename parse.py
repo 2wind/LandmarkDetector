@@ -77,6 +77,9 @@ def main():
             print(f"average pixel difference: {average}")
             print(f"per-landmark pixel difference: ")
             print(each)
+            diff_per_size = np.average(np.abs(photo_landmarks - photo_true_landmarks) / np.array(photo_image.size))
+            print(f"pixel difference per image size: {diff_per_size}")
+
             film_image = parse_image(args.film_image)
             save_transform_image(film_landmarks, photo_landmarks, film_image, photo_image, args.output_image, matrix, photo_true_landmarks)
 
