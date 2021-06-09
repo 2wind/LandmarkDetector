@@ -12,6 +12,9 @@ train.ipynb의 "From Face detection to landmark detection, IRL"을 실행해주�
 ### Using pretrained model
 모델 자체는 공개하지 않습니다.
 
+### Running program 
+parse.py를 CUI에서 실행하면 됩니다. `python parse.py -h` 를 참고하여 실행해주세요.
+
 ### 결과
 MSE loss = 0.0001 정도까지 Train이 가능합니다. Test set(224x224) 에 대해, 평균 13px 정도의 오차가 나게 됩니다.
 
