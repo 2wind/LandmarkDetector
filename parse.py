@@ -14,6 +14,7 @@ import module
 import time
 from sys import exit
 
+from facenet_pytorch import MTCNN
 
 
 def main():
@@ -172,6 +173,7 @@ def save_results(transform: list, output_path:str):
     output_string = f"translation_x={translation_x}\ntranslation_y={translation_y}\nscale={scale}\ndegree={degree}\n"
     with open(output_path, "w") as output:
         output.write(output_string)
+    print(f"transform output saved to {output_path}")
 
 
 def transform_landmarks(matrix, landmarks):

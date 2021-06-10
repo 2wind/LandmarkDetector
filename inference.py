@@ -34,8 +34,7 @@ def find_landmark(input_image: Image, model: module.LandmarkNetwork):
     returns: landmarks: numpy.array() in (6, 2) format, includes 6 landmarks in (x, y) format.
     '''
     # set device to GPU if available.
-    # device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    device = 'cpu'
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('Using {} device'.format(device))
 
     # load MTCNN for face detection.
