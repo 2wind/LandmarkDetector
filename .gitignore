@@ -135,6 +135,10 @@ AutoAlign_test/
 
 # Legacy models that takes too much space
 legacy_models/
+model/
 
 *.pth
 *.tar
+
+parse.build/
+parse.dist/
