@@ -32,7 +32,7 @@ def main():
     returns:
         Nothing.
     '''
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Landmark detector and transform calculator")
     # General arguments
     parser.add_argument('-v', '--verbose', help='output some helpful texts', action='store_true')
     parser.add_argument('-t', '--test', help='testing landmark detection only', action='store_true')
@@ -52,39 +52,45 @@ def main():
 
     args = parser.parse_args()
 
+    model = None
 
+    try:
 
-    photo_image = parse_image(args.photo_image)
+        photo_image = parse_image(args.photo_image)
 
-    model = inference.load_model(args.model)
+        model = inference.load_model(args.model)
 
-    photo_landmarks = inference.find_landmark(photo_image, model)
+        photo_landmarks = inference.find_landmark(photo_image, model)
 
-    if (args.test):
-        print(photo_landmarks)
-        return
+        if (args.test):
+            print(photo_landmarks)
+            return
 
-    film_landmarks = extract_landmarks(parse_tsv(args.film_tsv), module.landmark_regex_string, module.landmark_number)
+        film_landmarks = extract_landmarks(parse_tsv(args.film_tsv), module.landmark_regex_string, module.landmark_number)
 
-    matrix = inference.calculate_matrix(film_landmarks, photo_landmarks)
-    transform = inference.calculate_transform(film_landmarks, photo_landmarks, matrix)
+        matrix = inference.calculate_matrix(film_landmarks, photo_landmarks)
+        transform = inference.calculate_transform(film_landmarks, photo_landmarks, matrix)
 
-    save_results(transform, args.output)
+        save_results(transform, args.output)
 
-    if (args.verbose):
-        if args.photo_tsv:
-            photo_true_landmarks = extract_landmarks(parse_tsv(args.photo_tsv), module.landmark_regex_string, module.landmark_number)
-            average, each = inference.pixel_distance(photo_landmarks, photo_true_landmarks)
-            print(f"average pixel difference: {average}")
-            print(f"per-landmark pixel difference: ")
-            print(each)
-            diff_per_size = np.average(np.abs(photo_landmarks - photo_true_landmarks) / np.array(photo_image.size))
-            print(f"pixel difference per image size: {diff_per_size}")
+        if (args.verbose):
+            print(transform)
+            if args.photo_tsv:
+                photo_true_landmarks = extract_landmarks(parse_tsv(args.photo_tsv), module.landmark_regex_string, module.landmark_number)
+                average, each = inference.pixel_distance(photo_landmarks, photo_true_landmarks)
+                print(f"average pixel difference: {average}")
+                print(f"per-landmark pixel difference: ")
+                print(each)
+                diff_per_size = np.average(np.abs(photo_landmarks - photo_true_landmarks) / np.array(photo_image.size))
+                print(f"pixel difference per image size: {diff_per_size}")
 
-            film_image = parse_image(args.film_image)
-            save_transform_image(film_landmarks, photo_landmarks, film_image, photo_image, args.output_image, matrix, photo_true_landmarks)
-
-    del model
+                film_image = parse_image(args.film_image)
+                save_transform_image(film_landmarks, photo_landmarks, film_image, photo_image, args.output_image, matrix, photo_true_landmarks)
+    except:
+        parser.print_help()
+    finally:
+        if model is not None:
+            del model
 
 def parse_image(image_path: str):
     '''

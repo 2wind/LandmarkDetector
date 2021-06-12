@@ -13,10 +13,15 @@ from facenet_pytorch import MTCNN
 landmark_number = module.landmark_number
 
 def load_model(model_path: str):
+
+    # set device to GPU if available.
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    print('Using {} device'.format(device))
+
     # Initialize landmark detection model using model_path.
     best_network = module.LandmarkNetwork(num_classes=landmark_number*2)
     # try:
-    best_network.load_state_dict(torch.load(model_path)['network_state_dict'])
+    best_network.load_state_dict(torch.load(model_path, map_location=torch.device(device))['network_state_dict'])
     best_network.eval()
     
     return best_network
@@ -33,9 +38,7 @@ def find_landmark(input_image: Image, model: module.LandmarkNetwork):
 
     returns: landmarks: numpy.array() in (6, 2) format, includes 6 landmarks in (x, y) format.
     '''
-    # set device to GPU if available.
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    print('Using {} device'.format(device))
 
     # load MTCNN for face detection.
     mtcnn = MTCNN(image_size=224, device=device)
