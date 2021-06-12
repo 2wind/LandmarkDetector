@@ -14,9 +14,6 @@ import module
 import time
 from sys import exit
 
-from facenet_pytorch import MTCNN
-
-
 def main():
     '''
     main():
@@ -85,7 +82,7 @@ def main():
                 print(f"pixel difference per image size: {diff_per_size}")
             else:
                 photo_true_landmarks = None
-                
+
             film_image = parse_image(args.film_image)
             save_transform_image(film_landmarks, photo_landmarks, film_image, photo_image, args.output_image, matrix, photo_true_landmarks)
     except:

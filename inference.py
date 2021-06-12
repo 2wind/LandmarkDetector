@@ -4,7 +4,7 @@ import cv2
 
 import torch 
 import torch.nn as nn
-import torchvision.transforms.functional as TF
+from torchvision.transforms.functional import to_tensor, resized_crop, normalize
 
 import module
 
@@ -55,9 +55,9 @@ def find_landmark(input_image: Image, model: module.LandmarkNetwork):
     x0, y0, x1, y1 = int(x0+face_width * 0.05), int(y0), int(x1 + face_width * 0.05), int(y1)
 
     # Crop head image, resize to 224x224, and convert it into tensor format.
-    image = TF.resized_crop(grayscale_image, y0, x0, y1-y0, x1-x0, size=(224, 224))
-    image = TF.to_tensor(image)
-    image = TF.normalize(image, [0.6945], [0.33497])
+    image = resized_crop(grayscale_image, y0, x0, y1-y0, x1-x0, size=(224, 224))
+    image = to_tensor(image)
+    image = normalize(image, [0.6945], [0.33497])
 
     # Detect landmarks from image.
     with torch.no_grad():
