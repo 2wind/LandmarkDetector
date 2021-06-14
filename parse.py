@@ -91,7 +91,7 @@ def main():
         save_results(transform, args.output)
         if (args.verbose):
             transform_calc_time = time.perf_counter()
-            print(f"> landmark detecting: took {transform_calc_time - landmark_detecting_time:0.4f} seconds")
+            print(f"> transform detecting: took {transform_calc_time - landmark_detecting_time:0.4f} seconds")
 
         if (args.verbose):
             print(transform)
@@ -109,7 +109,7 @@ def main():
 
             else:
                 photo_true_landmarks = None
-                
+
             if args.output_image:
                 film_image = parse_image(args.film_image)
                 save_transform_image(film_landmarks, photo_landmarks, film_image, photo_image, args.output_image, matrix, photo_true_landmarks)

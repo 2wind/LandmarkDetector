@@ -3,12 +3,13 @@ from PIL import Image
 import cv2
 
 import torch 
-import torch.nn as nn
 from torchvision.transforms.functional import to_tensor, resized_crop, normalize
 
 import module
 
 from facenet_pytorch import MTCNN
+
+import time
 
 landmark_number = module.landmark_number
 
@@ -21,7 +22,10 @@ def load_model(model_path: str):
     # Initialize landmark detection model using model_path.
     best_network = module.LandmarkNetwork(num_classes=landmark_number*2)
     # try:
-    best_network.load_state_dict(torch.load(model_path, map_location=torch.device(device))['network_state_dict'])
+    if (model_path.endswith(".tar")):
+        best_network.load_state_dict(torch.load(model_path, map_location=torch.device(device))['network_state_dict'])
+    else:
+        best_network.load_state_dict(torch.load(model_path))
     best_network.eval()
     
     return best_network
@@ -39,13 +43,10 @@ def find_landmark(input_image: Image, model: module.LandmarkNetwork):
     returns: landmarks: numpy.array() in (6, 2) format, includes 6 landmarks in (x, y) format.
     '''
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
+    # start = time.perf_counter()
     # load MTCNN for face detection.
-    mtcnn = MTCNN(image_size=224, device=device)
-
-    # Load grayscale image from input_image.
-    grayscale_image = input_image.convert('L')
-
+    mtcnn = MTCNN()
+    
     # detect head using MTCNN
     boxes, probs = mtcnn.detect(input_image)
     face = boxes[0]
@@ -54,6 +55,11 @@ def find_landmark(input_image: Image, model: module.LandmarkNetwork):
     # translate detected bounding box to right, to include nosetip to bounding box.
     x0, y0, x1, y1 = int(x0+face_width * 0.05), int(y0), int(x1 + face_width * 0.05), int(y1)
 
+    # mtcnn_time = time.perf_counter()
+    # print(f"mtcnn: took {mtcnn_time - start:0.4f} s")
+
+    # Load grayscale image from input_image.
+    grayscale_image = input_image.convert('L')
     # Crop head image, resize to 224x224, and convert it into tensor format.
     image = resized_crop(grayscale_image, y0, x0, y1-y0, x1-x0, size=(224, 224))
     image = to_tensor(image)
@@ -67,6 +73,9 @@ def find_landmark(input_image: Image, model: module.LandmarkNetwork):
     # convert back to original coordinate.
     landmarks = (landmarks.view(landmark_number,2).detach().numpy() + 0.5) * np.array([[x1-x0, y1-y0]]) + np.array([[x0, y0]])
     # now landmarks are in (6, 2) format.
+
+    # inference_time = time.perf_counter()
+    # print(f"inference: took {inference_time - mtcnn_time:0.4f} s")
 
     return landmarks
 
