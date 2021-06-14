@@ -116,7 +116,8 @@ def main():
                 saving_image_time = time.perf_counter()
                 print(f"> saving image: took {saving_image_time - transform_calc_time:0.4f} seconds")
 
-    except:
+    except Exception as e:
+        print(e)
         parser.print_help()
     finally:
         if model is not None:
@@ -135,7 +136,8 @@ def parse_image(image_path: str):
     try:
         image = Image.open(image_path)
         return image
-    except FileNotFoundError:
+    except FileNotFoundError as e:
+        print(e)
         print(f"Image not found in {image_path}")
         exit()
 
@@ -166,7 +168,8 @@ def parse_tsv(tsv_path: str):
         df.columns = ['name', 'X', 'Y']
 
         return df
-    except FileNotFoundError:
+    except FileNotFoundError as e:
+        print(e)
         print(f"Landmark text file not found in {tsv_path}")
         exit()
 
