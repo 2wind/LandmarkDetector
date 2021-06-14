@@ -8,8 +8,8 @@ import imutils
 import pandas as pd
 import numpy as np
 
-import inference
-import module
+from inference import *
+from module import landmark_number, landmark_regex_string
 
 import time
 from sys import exit
@@ -66,14 +66,14 @@ def main():
             img_loading_time = time.perf_counter()
             print(f"> image loading: took {img_loading_time - arg_end:0.4f} seconds")
 
-        model = inference.load_model(args.model)
+        model = load_model(args.model)
 
         if (args.verbose):
             model_loading_time = time.perf_counter()
             print(f"> model loading: took {model_loading_time - img_loading_time:0.4f} seconds")
 
 
-        photo_landmarks = inference.find_landmark(photo_image, model)
+        photo_landmarks = find_landmark(photo_image, model)
 
         if (args.verbose):
             landmark_detecting_time = time.perf_counter()
@@ -83,10 +83,10 @@ def main():
             print(photo_landmarks)
             return
 
-        film_landmarks = extract_landmarks(parse_tsv(args.film_tsv), module.landmark_regex_string, module.landmark_number)
+        film_landmarks = extract_landmarks(parse_tsv(args.film_tsv), landmark_regex_string, landmark_number)
 
-        matrix = inference.calculate_matrix(film_landmarks, photo_landmarks)
-        transform = inference.calculate_transform(film_landmarks, photo_landmarks, matrix)
+        matrix = calculate_matrix(film_landmarks, photo_landmarks)
+        transform = calculate_transform(film_landmarks, photo_landmarks, matrix)
 
         save_results(transform, args.output)
         if (args.verbose):
@@ -97,8 +97,8 @@ def main():
             print(transform)
             if args.photo_tsv:
                 
-                photo_true_landmarks = extract_landmarks(parse_tsv(args.photo_tsv), module.landmark_regex_string, module.landmark_number)
-                average, each = inference.pixel_distance(photo_landmarks, photo_true_landmarks)
+                photo_true_landmarks = extract_landmarks(parse_tsv(args.photo_tsv), landmark_regex_string, landmark_number)
+                average, each = pixel_distance(photo_landmarks, photo_true_landmarks)
                 print(f"average pixel difference: {average}")
                 print(f"per-landmark pixel difference: ")
                 print(each)

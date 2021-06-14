@@ -5,13 +5,12 @@ import cv2
 import torch 
 from torchvision.transforms.functional import to_tensor, resized_crop, normalize
 
-import module
+from module import LandmarkNetwork, landmark_number
 
 from facenet_pytorch import MTCNN
 
 import time
 
-landmark_number = module.landmark_number
 
 def load_model(model_path: str):
 
@@ -20,7 +19,7 @@ def load_model(model_path: str):
     print('Using {} device'.format(device))
 
     # Initialize landmark detection model using model_path.
-    best_network = module.LandmarkNetwork(num_classes=landmark_number*2)
+    best_network = LandmarkNetwork(num_classes=landmark_number*2)
     # try:
     if (model_path.endswith(".tar")):
         best_network.load_state_dict(torch.load(model_path, map_location=torch.device(device))['network_state_dict'])
@@ -34,7 +33,7 @@ def load_model(model_path: str):
     #     del best_network
     #     exit()
 
-def find_landmark(input_image: Image, model: module.LandmarkNetwork):
+def find_landmark(input_image: Image, model: LandmarkNetwork):
     '''
     find_landmark(): infers landmark from image_path, using model in model_path.
         image_path: str, full path to image inferenced.
