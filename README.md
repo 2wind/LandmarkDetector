@@ -25,7 +25,7 @@ parse.py를 CUI에서 실행하면 됩니다. `python parse.py -h` 를 참고하
 
   아무 옵션도 설정하지 않을 경우 도움말 메시지가 출력됩니다.
   -h, --help            도움말 메시지를 출력하고 종료합니다.
-  -v, --verbose         랜드마크 정합 결과를 화면에 출력하고, 정합 이미지를 저장합니다.
+  -v, --verbose         랜드마크 정합 결과를 화면에 출력하고, 정합 이미지를 저장합니다. 단계별 실행 시간도 출력합니다.
   -t, --test            측면 이미지에서 랜드마크만 인식하고 출력한 뒤 종료합니다.
   -fi FILM_IMAGE, --film_image FILM_IMAGE
                         필요한 경우, 필름 이미지의 경로를 지정합니다. (기본: film.jpg)
@@ -42,7 +42,7 @@ parse.py를 CUI에서 실행하면 됩니다. `python parse.py -h` 를 참고하
                         출력할 정합 텍스트 파일의 경로를 지정합니다. (기본: result.txt)
   --output_image OUTPUT_IMAGE
                         verbose 옵션이 지정되었을 경우 저장할 정합 이미지의 경로를 지정합니다.
-                        (기본: result.jpg)
+                        경로가 지정되지 않으면 이미지를 저장하지 않습니다.
 
   도움말 메시지를 출력하려면
     > python parse.py -h
