@@ -29,6 +29,8 @@ def main():
     returns:
         Nothing.
     '''
+    main_start = time.perf_counter()
+
     parser = argparse.ArgumentParser(description="Landmark detector and transform calculator")
     # General arguments
     parser.add_argument('-v', '--verbose', help='output some helpful texts', action='store_true')
@@ -50,14 +52,32 @@ def main():
     args = parser.parse_args()
 
     model = None
+    
+    if (args.verbose):
+        arg_end = time.perf_counter()
+        print(f"> parser: took {arg_end - main_start:0.4f} seconds")
 
     try:
 
         photo_image = parse_image(args.photo_image)
 
+        
+        if (args.verbose):
+            img_loading_time = time.perf_counter()
+            print(f"> image loading: took {img_loading_time - arg_end:0.4f} seconds")
+
         model = inference.load_model(args.model)
 
+        if (args.verbose):
+            model_loading_time = time.perf_counter()
+            print(f"> model loading: took {model_loading_time - img_loading_time:0.4f} seconds")
+
+
         photo_landmarks = inference.find_landmark(photo_image, model)
+
+        if (args.verbose):
+            landmark_detecting_time = time.perf_counter()
+            print(f"> landmark detection: took {landmark_detecting_time - model_loading_time:0.4f} seconds")
 
         if (args.test):
             print(photo_landmarks)
@@ -69,10 +89,14 @@ def main():
         transform = inference.calculate_transform(film_landmarks, photo_landmarks, matrix)
 
         save_results(transform, args.output)
+        if (args.verbose):
+            transform_calc_time = time.perf_counter()
+            print(f"> landmark detecting: took {transform_calc_time - landmark_detecting_time:0.4f} seconds")
 
         if (args.verbose):
             print(transform)
             if args.photo_tsv:
+                
                 photo_true_landmarks = extract_landmarks(parse_tsv(args.photo_tsv), module.landmark_regex_string, module.landmark_number)
                 average, each = inference.pixel_distance(photo_landmarks, photo_true_landmarks)
                 print(f"average pixel difference: {average}")
@@ -80,6 +104,9 @@ def main():
                 print(each)
                 diff_per_size = np.average(np.abs(photo_landmarks - photo_true_landmarks) / np.array(photo_image.size))
                 print(f"pixel difference per image size: {diff_per_size}")
+                checking_against_answer_time = time.perf_counter()
+                print(f"> checking against answer: took {checking_against_answer_time - transform_calc_time:0.4f} seconds")
+
             else:
                 photo_true_landmarks = None
 
