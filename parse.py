@@ -47,7 +47,7 @@ def main():
 
     # output arguments
     parser.add_argument('-o', '--output', type=str, default='result.txt', help='path to the output')
-    parser.add_argument('--output_image', type=str, default='result.jpg', help='path to the output image(verbose)')
+    parser.add_argument('--output_image', type=str, help='path to the output image(verbose)')
 
     args = parser.parse_args()
 
@@ -109,9 +109,13 @@ def main():
 
             else:
                 photo_true_landmarks = None
+                
+            if args.output_image:
+                film_image = parse_image(args.film_image)
+                save_transform_image(film_landmarks, photo_landmarks, film_image, photo_image, args.output_image, matrix, photo_true_landmarks)
+                saving_image_time = time.perf_counter()
+                print(f"> saving image: took {saving_image_time - transform_calc_time:0.4f} seconds")
 
-            film_image = parse_image(args.film_image)
-            save_transform_image(film_landmarks, photo_landmarks, film_image, photo_image, args.output_image, matrix, photo_true_landmarks)
     except:
         parser.print_help()
     finally:
