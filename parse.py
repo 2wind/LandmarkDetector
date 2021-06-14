@@ -54,6 +54,8 @@ def main():
     model = None
     
     if (args.verbose):
+        print("\n Starting Landmark Detection...")
+        print(f"NAME: {args.photo_image}")
         arg_end = time.perf_counter()
         print(f"> parser: took {arg_end - main_start:0.4f} seconds")
 
@@ -109,10 +111,11 @@ def main():
 
             else:
                 photo_true_landmarks = None
+                diff_per_size = None
 
             if args.output_image:
                 film_image = parse_image(args.film_image)
-                save_transform_image(film_landmarks, photo_landmarks, film_image, photo_image, args.output_image, matrix, photo_true_landmarks)
+                save_transform_image(film_landmarks, photo_landmarks, film_image, photo_image, args.output_image, matrix, photo_true_landmarks, diff_per_size)
                 saving_image_time = time.perf_counter()
                 print(f"> saving image: took {saving_image_time - transform_calc_time:0.4f} seconds")
 
@@ -238,7 +241,7 @@ def transform_landmarks(matrix, landmarks):
     result = np.dot(matrix, homography_landmarks.T).T
     return result
 
-def save_transform_image(film_landmarks, photo_landmarks, film_image, photo_image, photo_output, matrix, solution_landmarks=None):
+def save_transform_image(film_landmarks, photo_landmarks, film_image, photo_image, photo_output, matrix, solution_landmarks=None, diff_per_size=None):
     '''
     save_transform_image(film_landmarks: np.array(),
                         photo_landmarks: np.array(), 
@@ -246,7 +249,8 @@ def save_transform_image(film_landmarks, photo_landmarks, film_image, photo_imag
                         photo_image: PIL.Image,
                         photo_output: str,
                         matrix: np.array(),
-                        solution_landmarks=None : np.array()):
+                        solution_landmarks=None : np.array()),
+                        diff_per_size:float:
 
     film_landmarks: landmarks in film.
     photo_landmarks: landmarks in photo.
@@ -255,6 +259,7 @@ def save_transform_image(film_landmarks, photo_landmarks, film_image, photo_imag
     photo_output: full path to save image.
     matrix: transformation matrix from film to photo.
     solution_landmarks: landmarks in photo(solution). Optional.
+    diff_per_size: difference between true landmark position and landmarks found, relative to image size. Optional.
 
     Saves image that contains photo, film image(warped), with landmark dots overlayed.
 
@@ -281,7 +286,10 @@ def save_transform_image(film_landmarks, photo_landmarks, film_image, photo_imag
     plt.scatter(photo_landmarks[:,0], photo_landmarks[:,1], c = 'g', s = 5)
     if (solution_landmarks is not None):
         plt.scatter(solution_landmarks[:,0], solution_landmarks[:,1], c = 'b', s=5)
-    plt.text(0, 0, "Legend) landmarks in film(warped): red\n landmarks found in photo: green\n landmark solution of photo: blue")
+        plt.text(0, photo_image.size[1], "Legend) landmarks in film(warped): red\n landmarks found in photo: green\n landmark solution of photo: blue")
+    plt.text(0, -50, f"Name: {photo_output}")
+    if diff_per_size is not None:
+        plt.text(0, 0, f"diff: {diff_per_size}")
     plt.savefig(photo_output, bbox_inches='tight', dpi=300)
     print(f"photo saved on {photo_output}.")
 
