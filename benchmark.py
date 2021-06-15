@@ -22,7 +22,7 @@ times = pd.DataFrame(columns=['prefix', 'time'])
 for prefix in valid_prefix:
     pi, pt, fi, ft = return_path(prefix)
     start = time.perf_counter()
-    subprocess.run(f"parse -v -m resnet_best_model.pth -fi {input_folder + fi} -ft {input_folder + ft} -pi {input_folder + pi} -pt {input_folder + pt} -o {output_folder+prefix}.txt --output_image {output_folder+prefix}.jpg")
+    subprocess.run(f"parse -v -m resnet_best_model.pth -fi {input_folder + fi} -ft {input_folder + ft} -pi {input_folder + pi} -pt {input_folder + pt} -o {output_folder+prefix}.txt --output_image {output_folder+prefix}.jpg --debug_text {output_folder+prefix}.csv" )
     end = time.perf_counter()
     print(end - start)
     times.loc[len(times.index)] = [prefix, end - start]

@@ -48,17 +48,23 @@ def main():
     # output arguments
     parser.add_argument('-o', '--output', type=str, default='result.txt', help='path to the output')
     parser.add_argument('--output_image', type=str, help='path to the output image(verbose)')
+    parser.add_argument('--debug_text', type=str, help='path to the output image(verbose)')
 
     args = parser.parse_args()
 
     model = None
+
+
     
     if (args.verbose):
+        debug_logger = pd.DataFrame(columns=["Name", "parser activation", "image loading", "model loading", "landmark detection", "transform detection", "checking against answer", "image saving", "total", "diff_per_size"])
+
         print("\n Starting Landmark Detection...")
         print(f"NAME: {args.photo_image}")
         arg_end = time.perf_counter()
         print(f"> parser: took {arg_end - main_start:0.4f} seconds")
-
+        debug_logger.at[0, 'Name'] = args.photo_image
+        debug_logger.at[0, "parser activation"] = arg_end - main_start
     try:
 
         photo_image = parse_image(args.photo_image)
@@ -67,19 +73,21 @@ def main():
         if (args.verbose):
             img_loading_time = time.perf_counter()
             print(f"> image loading: took {img_loading_time - arg_end:0.4f} seconds")
+            debug_logger.at[0, "image loading"] = img_loading_time - arg_end
 
         model = load_model(args.model)
 
         if (args.verbose):
             model_loading_time = time.perf_counter()
             print(f"> model loading: took {model_loading_time - img_loading_time:0.4f} seconds")
-
+            debug_logger.at[0, "model loading"] = model_loading_time - img_loading_time
 
         photo_landmarks = find_landmark(photo_image, model)
 
         if (args.verbose):
             landmark_detecting_time = time.perf_counter()
             print(f"> landmark detection: took {landmark_detecting_time - model_loading_time:0.4f} seconds")
+            debug_logger.at[0, "landmark detection"] = landmark_detecting_time - model_loading_time
 
         if (args.test):
             print(photo_landmarks)
@@ -94,9 +102,9 @@ def main():
         if (args.verbose):
             transform_calc_time = time.perf_counter()
             print(f"> transform detecting: took {transform_calc_time - landmark_detecting_time:0.4f} seconds")
-
-        if (args.verbose):
+            debug_logger.at[0, "transform detection"] = transform_calc_time - landmark_detecting_time
             print(transform)
+
             if args.photo_tsv:
                 
                 photo_true_landmarks = extract_landmarks(parse_tsv(args.photo_tsv), landmark_regex_string, landmark_number)
@@ -108,7 +116,8 @@ def main():
                 print(f"pixel difference per image size: {diff_per_size}")
                 checking_against_answer_time = time.perf_counter()
                 print(f"> checking against answer: took {checking_against_answer_time - transform_calc_time:0.4f} seconds")
-
+                debug_logger.at[0, "checking against answer"] = checking_against_answer_time - transform_calc_time
+                debug_logger.at[0, "diff_per_size"] = diff_per_size
             else:
                 photo_true_landmarks = None
                 diff_per_size = None
@@ -118,13 +127,18 @@ def main():
                 save_transform_image(film_landmarks, photo_landmarks, film_image, photo_image, args.output_image, matrix, photo_true_landmarks, diff_per_size)
                 saving_image_time = time.perf_counter()
                 print(f"> saving image: took {saving_image_time - transform_calc_time:0.4f} seconds")
+                debug_logger.at[0, "image saving"] = saving_image_time - transform_calc_time
+
+            debug_logger.at[0, "total"] = time.perf_counter() - main_start
+            if (args.debug_text is not None):
+                debug_logger.to_csv(args.debug_text)
 
     except Exception as e:
         print(e)
         parser.print_help()
-    finally:
-        if model is not None:
-            del model
+    # finally:
+    #     if model is not None:
+    #         del model
 
 def parse_image(image_path: str):
     '''
@@ -287,7 +301,7 @@ def save_transform_image(film_landmarks, photo_landmarks, film_image, photo_imag
     if (solution_landmarks is not None):
         plt.scatter(solution_landmarks[:,0], solution_landmarks[:,1], c = 'b', s=5)
         plt.text(0, photo_image.size[1], "Legend) landmarks in film(warped): red\n landmarks found in photo: green\n landmark solution of photo: blue")
-    plt.text(0, -50, f"Name: {photo_output}")
+    plt.text(0, -80, f"Name: {photo_output}")
     if diff_per_size is not None:
         plt.text(0, 0, f"diff: {diff_per_size}")
     plt.savefig(photo_output, bbox_inches='tight', dpi=300)
