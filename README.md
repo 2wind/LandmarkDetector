@@ -43,13 +43,17 @@ parse.py를 CUI에서 실행하면 됩니다. `python parse.py -h` 를 참고하
   --output_image OUTPUT_IMAGE
                         verbose 옵션이 지정되었을 경우 저장할 정합 이미지의 경로를 지정합니다.
                         경로가 지정되지 않으면 이미지를 저장하지 않습니다.
+  --debug_text DEBUG_TEXT
+                        verbose 옵션이 지정되었을 경우 내부 실행 시간, 정합 정확도와 관련된 데이터를 csv 형식으로 저장합니다.
+                        경로가 지정되지 않으면 파일을 저장하지 않습니다.
+    
 
   도움말 메시지를 출력하려면
     > python parse.py -h
   이미지 정합을 하려면
     > python parse.py -m PATH_TO_MODEL -ft PATH_TO_FILM_TSV -pi PATH_TO_PHOTO_IMAGE
   정답 랜드마크와 비교한 정합 이미지를 출력하려면
-    > python parse.py -v -m PATH_TO_MODEL -fi PATH_TO_FILM_IMAGE -ft PATH_TO_FILM_TSV -pi PATH_TO_PHOTO_IMAGE -pt PATH_TO_PHOTO_TSV
+    > python parse.py -v -m PATH_TO_MODEL -fi PATH_TO_FILM_IMAGE -ft PATH_TO_FILM_TSV -pi PATH_TO_PHOTO_IMAGE -pt PATH_TO_PHOTO_TSV --output_image PATH_TO_OUTPUT_IMAGE --debug_text PATH_TO_DEBUG_TEXT
 
 
 ```
